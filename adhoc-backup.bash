@@ -64,6 +64,7 @@ date=$(date "+%Y%m%d.%H")
 verbose_flag=""
 run_flag="set"
 backup_targets=()
+backup_excludes=()
 backup_directory=""
 backup_max_age="30"
 rsync_command="${RSYNC:-rsync}"
@@ -118,6 +119,13 @@ config_file="$1"; shift
 
 backup_date_dir="$backup_directory/$date"
 
+for backup_exclude in "${backup_excludes[@]}"; do
+  rsync_options=(
+    "${rsync_options[@]}"
+    --exclude "$backup_exclude"
+  )
+done
+
 dst_dir_prev=""
 date_prev=$(
   ls -F "$backup_directory/" \
@@ -141,7 +149,6 @@ run "$rsync_command" \
   --relative \
   --delete \
   --delete-excluded \
-  --exclude ".??*.sw?" \
   ${dst_dir_prev:+--link-dest "$dst_dir_prev"} \
   "${rsync_options[@]}" \
   "${backup_targets[@]}" \
