@@ -59,7 +59,7 @@ run_if()
 ## Options
 ## ======================================================================
 
-date=$(date "+%Y%m%d%H%M")
+date=$(date "+%Y%m%d.%H")
 
 verbose_flag=""
 run_flag="set"
@@ -68,7 +68,7 @@ backup_directory=""
 backup_max_age="30"
 rsync_command="${RSYNC:-rsync}"
 rsync_options=()
-date_dir_re='^[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9][0-2][0-9][0-5][0-9]/$'
+date_dir_re='^[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]\.[0-2][0-9]/$'
 
 cmd_usage="Usage: $0 [OPTIONS] CONFIG_FILE
 
@@ -122,7 +122,7 @@ dst_dir_prev=""
 date_prev=$(
   ls -F "$backup_directory/" \
   |grep -- "$date_dir_re" \
-  |sort -n \
+  |sort \
   |sed -n '$s#/$##p'
 )
 if [[ -n $date_prev && $date_prev != "$date" ]]; then
@@ -161,7 +161,7 @@ fi
 ls -F "$backup_directory" \
 |grep "$date_dir_re" \
 |sed 's#/$##' \
-|sort -nr \
+|sort -r \
 |grep -v "^$date$" \
 |tail -n +"$backup_max_age" \
 |while read date; do
