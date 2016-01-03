@@ -110,7 +110,7 @@ config_file="$1"; shift
 
 . "$config_file"
 
-[[ -n $backup_targets ]] || pdie "No backup_targets in config file: $config_file"
+[[ -n ${#backup_targets[@]} ]] || pdie "No backup_targets in config file: $config_file"
 [[ -n $backup_directory ]] || pdie "No backup_directory in config file: $config_file"
 [[ -d $backup_directory ]] || pdie "Backup directory not found: $backup_directory"
 
@@ -142,7 +142,7 @@ run "$rsync_command" \
   --delete \
   --delete-excluded \
   --exclude ".??*.sw?" \
-  ${dst_dir_prev:+--link-dest} ${dst_dir_prev:+"$dst_dir_prev"} \
+  ${dst_dir_prev:+--link-dest "$dst_dir_prev"} \
   "${rsync_options[@]}" \
   "${backup_targets[@]}" \
   "$backup_date_dir" \
