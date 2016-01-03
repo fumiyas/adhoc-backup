@@ -129,9 +129,6 @@ if [[ -n $date_prev && $date_prev != "$date" ]]; then
   dst_dir_prev="$backup_directory/$date_prev"
 fi
 
-## Remove comments in $backup_targets
-backup_targets=$(echo "$backup_targets" |grep -v '^[ 	]*#')
-
 ## Do backup by rsync
 ## ----------------------------------------------------------------------
 
