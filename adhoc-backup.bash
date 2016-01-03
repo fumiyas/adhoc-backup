@@ -1,7 +1,8 @@
 #!/bin/bash
 ##
-## Ad-hoc backup tool
+## Ad-hoc backup tool using rsync --link-dest
 ## Copyright (c) 2007-2015 SATOH Fumiyasu @ OSS Technology Corp., Japan
+##               <https://GitHub.com/fumiyas/adhoc-backup>
 ##               <http://www.OSSTech.co.jp/>
 ##
 ## License: GNU General Public License version 3
