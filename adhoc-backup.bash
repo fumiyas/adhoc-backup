@@ -143,6 +143,10 @@ if [[ -n $backup_target_host ]]; then
     "${rsync_options[@]}"
   )
   for ((i = 0; i < ${#backup_targets[@]}; i++)); do
+    if [[ ${backup_targets[$i]} != /* ]]; then
+      ## rsync server over ssh
+      backup_targets[$i]=":${backup_targets[$i]}"
+    fi
     backup_targets[$i]="$backup_target_host:${backup_targets[$i]}"
   done
 fi
