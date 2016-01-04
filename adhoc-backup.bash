@@ -119,6 +119,7 @@ config_file="$1"; shift
 ## ======================================================================
 
 backup_date_dir="$backup_directory/$date"
+backup_latest_link="$backup_directory/latest"
 
 for backup_exclude in "${backup_excludes[@]}"; do
   rsync_options=(
@@ -155,6 +156,10 @@ run "$rsync_command" \
   "${backup_targets[@]}" \
   "$backup_date_dir" \
 ;
+
+rm -f "$backup_latest_link" \
+&& ln -s "$date" "$backup_latest_link" \
+|| pdie "Cannot update link for latest backup: $backup_latest_link"
 
 ## Expires old backups
 ## ----------------------------------------------------------------------
