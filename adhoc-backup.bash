@@ -64,12 +64,18 @@ date=$(date "+%Y%m%d.%H")
 
 verbose_flag=""
 run_flag="set"
+backup_target_host=""
 backup_targets=()
 backup_excludes=()
 backup_directory=""
 backup_max_age="30"
 rsync_path="${RSYNC:-rsync}"
 rsync_options=()
+ssh_path="${SSH:-ssh}"
+ssh_id_file=""
+ssh_options=(
+  -o 'ServerAliveInterval 60'
+)
 date_dir_re='^[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]\.[0-2][0-9]/$'
 
 cmd_usage="Usage: $0 [OPTIONS] CONFIG_FILE
@@ -127,6 +133,19 @@ for backup_exclude in "${backup_excludes[@]}"; do
     --exclude "$backup_exclude"
   )
 done
+
+if [[ -n $backup_target_host ]]; then
+  for ((i = 0; i < ${#ssh_options[@]}; i++)); do
+    ssh_options[$i]="\"${ssh_options[$i]}\""
+  done
+  rsync_options=(
+    --rsh "$ssh_path ${ssh_id:+ -i $ssh_id} ${ssh_options[*]-}"
+    "${rsync_options[@]}"
+  )
+  for ((i = 0; i < ${#backup_targets[@]}; i++)); do
+    backup_targets[$i]="$backup_target_host:${backup_targets[$i]}"
+  done
+fi
 
 dst_dir_prev=""
 date_prev=$(
