@@ -68,7 +68,7 @@ backup_targets=()
 backup_excludes=()
 backup_directory=""
 backup_max_age="30"
-rsync_command="${RSYNC:-rsync}"
+rsync_path="${RSYNC:-rsync}"
 rsync_options=()
 date_dir_re='^[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]\.[0-2][0-9]/$'
 
@@ -142,7 +142,7 @@ fi
 ## Do backup by rsync
 ## ----------------------------------------------------------------------
 
-run "$rsync_command" \
+run "$rsync_path" \
   ${verbose_flag:+--verbose} \
   ${no_run_flag:+--dry-run} \
   --archive \
@@ -155,6 +155,7 @@ run "$rsync_command" \
   "${rsync_options[@]}" \
   "${backup_targets[@]}" \
   "$backup_date_dir" \
+|| pdie "rsync command failed: $?" \
 ;
 
 rm -f "$backup_latest_link" \
