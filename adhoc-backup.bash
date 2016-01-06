@@ -76,7 +76,7 @@ ssh_id_file=""
 ssh_options=(
   -o 'ServerAliveInterval 60'
 )
-date_dir_re='^[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]\.[0-2][0-9]/$'
+date_dir_re='[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]\.[0-2][0-9]'
 
 cmd_usage="Usage: $0 [OPTIONS] CONFIG_FILE
 
@@ -151,16 +151,14 @@ if [[ -n $backup_target_host ]]; then
   done
 fi
 
-dst_dir_prev=""
 date_prev=$(
   ls -F "$backup_directory/" \
-  |grep -- "$date_dir_re" \
+  |grep -- "^$date_dir_re/\$" \
+  |grep -v "^${date//./\\.}/\$" \
   |sort \
   |sed -n '$s#/$##p'
 )
-if [[ -n $date_prev && $date_prev != "$date" ]]; then
-  dst_dir_prev="$backup_directory/$date_prev"
-fi
+backup_prev_dir="${date_prev:+$backup_directory/$date_prev}"
 
 ## Do backup by rsync
 ## ----------------------------------------------------------------------
@@ -174,7 +172,7 @@ run "$rsync_path" \
   --relative \
   --delete \
   --delete-excluded \
-  ${dst_dir_prev:+--link-dest "$dst_dir_prev"} \
+  ${backup_prev_dir:+--link-dest "$backup_prev_dir"} \
   "${rsync_options[@]}" \
   "${backup_targets[@]}" \
   "$backup_date_dir" \
@@ -193,7 +191,7 @@ if [[ $backup_max_age -le 0 ]]; then
 fi
 
 ls -F "$backup_directory" \
-|grep "$date_dir_re" \
+|grep "^$date_dir_re/\$" \
 |sed 's#/$##' \
 |sort -r \
 |grep -v "^$date$" \
