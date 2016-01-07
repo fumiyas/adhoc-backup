@@ -176,7 +176,7 @@ run "$rsync_path" \
   "${rsync_options[@]}" \
   "${backup_targets[@]}" \
   "$backup_date_dir" \
-|| pdie "rsync command failed: $?" \
+|| pdie "rsync command failed ($?)" \
 ;
 
 rm -f "$backup_latest_link" \
