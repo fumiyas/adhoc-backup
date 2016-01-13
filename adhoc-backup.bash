@@ -127,11 +127,8 @@ config_file="$1"; shift
 backup_date_dir="$backup_directory/$date"
 backup_latest_link="$backup_directory/latest"
 
-for backup_exclude in "${backup_excludes[@]}"; do
-  rsync_options=(
-    "${rsync_options[@]}"
-    --exclude "$backup_exclude"
-  )
+for backup_exclude in ${backup_excludes[@]+"${backup_excludes[@]}"}; do
+  rsync_options+=(--exclude "$backup_exclude")
 done
 
 if [[ -n $backup_target_host ]]; then
@@ -140,7 +137,7 @@ if [[ -n $backup_target_host ]]; then
   done
   rsync_options=(
     --rsh "$ssh_path ${ssh_id:+ -i $ssh_id} ${ssh_options[*]-}"
-    "${rsync_options[@]}"
+    ${rsync_options[@]+"${rsync_options[@]}"}
   )
   for ((i = 0; i < ${#backup_targets[@]}; i++)); do
     if [[ ${backup_targets[$i]} != /* ]]; then
@@ -173,7 +170,7 @@ run "$rsync_path" \
   --delete \
   --delete-excluded \
   ${backup_prev_dir:+--link-dest "$backup_prev_dir"} \
-  "${rsync_options[@]}" \
+  ${rsync_options[@]+"${rsync_options[@]}"} \
   "${backup_targets[@]}" \
   "$backup_date_dir" \
 || pdie "rsync command failed ($?)" \
