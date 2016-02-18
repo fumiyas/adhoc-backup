@@ -136,7 +136,7 @@ if [[ -n $backup_target_host ]]; then
     ssh_options[$i]="\"${ssh_options[$i]}\""
   done
   rsync_options=(
-    --rsh "$ssh_path ${ssh_id:+ -i $ssh_id} ${ssh_options[*]-}"
+    --rsh "$ssh_path ${ssh_id_file:+ -i '$ssh_id_file'} ${ssh_options[*]-}"
     ${rsync_options[@]+"${rsync_options[@]}"}
   )
   for ((i = 0; i < ${#backup_targets[@]}; i++)); do
