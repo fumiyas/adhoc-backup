@@ -162,6 +162,7 @@ backup_prev_dir="${date_prev:+$backup_directory/$date_prev}"
 
 run "$rsync_path" \
   ${verbose_flag:+--verbose} \
+  ${verbose_flag:+--stats} \
   ${no_run_flag:+--dry-run} \
   --archive \
   --omit-dir-times \
