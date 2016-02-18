@@ -89,7 +89,7 @@ Options:
 
 ## ----------------------------------------------------------------------
 
-while getopts vnr:a: opt; do
+while getopts vna: opt; do
   case "$opt" in
   v)
     verbose_flag="set"
