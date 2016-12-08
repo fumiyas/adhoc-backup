@@ -116,7 +116,7 @@ fi
 
 config_file="$1"; shift
 
-. "$config_file"
+. "$config_file" || pdie "Loading config file failed: $config_file"
 
 [[ -n ${#backup_targets[@]} ]] || pdie "No backup_targets in config file: $config_file"
 [[ -n $backup_directory ]] || pdie "No backup_directory in config file: $config_file"
