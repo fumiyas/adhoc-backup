@@ -177,8 +177,8 @@ run "$rsync_path" \
 || pdie "rsync command failed ($?)" \
 ;
 
-rm -f "$backup_latest_link" \
-&& ln -s "$date" "$backup_latest_link" \
+run_if "$run_flag" rm -f "$backup_latest_link" \
+&& run_if "$run_flag" ln -s "$date" "$backup_latest_link" \
 || pdie "Cannot update link for latest backup: $backup_latest_link"
 
 ## Expires old backups
