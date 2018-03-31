@@ -148,14 +148,18 @@ if [[ -n $backup_target_host ]]; then
   done
 fi
 
-date_prev=$(
-  ls -F "$backup_directory/" \
-  |grep -- "^$date_dir_re/\$" \
-  |grep -v "^${date//./\\.}/\$" \
-  |sort \
-  |sed -n '$s#/$##p'
-)
-backup_prev_dir="${date_prev:+$backup_directory/$date_prev}"
+if [[ -d $backup_latest_link ]]; then
+  backup_prev_dir="$backup_latest_link"
+else
+  date_prev=$(
+    ls -F "$backup_directory/" \
+    |grep -- "^$date_dir_re/\$" \
+    |grep -v "^${date//./\\.}/\$" \
+    |sort \
+    |sed -n '$s#/$##p'
+  )
+  backup_prev_dir="${date_prev:+$backup_directory/$date_prev}"
+fi
 
 ## Do backup by rsync
 ## ----------------------------------------------------------------------
@@ -197,4 +201,3 @@ ls -F "$backup_directory" \
 |while read date; do
   run_if "$run_flag" rm -rf "$backup_directory/$date"
 done
-
