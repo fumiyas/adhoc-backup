@@ -178,8 +178,11 @@ run "$rsync_path" \
   ${rsync_options[@]+"${rsync_options[@]}"} \
   "${backup_targets[@]}" \
   "$backup_date_dir" \
-|| pdie "rsync command failed ($?)" \
-;
+|| {
+  rc="$?"
+  mv "$backup_date_dir" "$backup_date_dir.incomplete"
+  pdie "rsync command failed ($rc)"
+}
 
 run_if "$run_flag" rm -f "$backup_latest_link" \
 && run_if "$run_flag" ln -s "$date" "$backup_latest_link" \
