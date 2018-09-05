@@ -232,10 +232,6 @@ run_if "$run_flag" rm -f "$backup_latest_link" \
 ## Expires old backups
 ## ----------------------------------------------------------------------
 
-if [[ $backup_max_age -le 0 ]]; then
-  exit 0
-fi
-
 ls_backup_dates -r \
 |tail -n +$((backup_max_age + 1)) \
 |while read -r date; do
