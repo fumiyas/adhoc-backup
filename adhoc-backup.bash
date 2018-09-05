@@ -57,6 +57,20 @@ run_if()
   return $?
 }
 
+## List and sort existing old backup dates
+ls_backup_dates()
+{
+  ls -F "$backup_directory/" \
+  |egrep "^($date_dir_re|$date_dir_oldformat_re)/\$" \
+  |sed \
+    -e 's#/$##' \
+    -e 's/.*/& &/' \
+    -e 's/\.\(..\)/\199/' \
+  |sort "$@" \
+  |sed 's/.* //' \
+  ;
+}
+
 ## Options
 ## ======================================================================
 
@@ -75,6 +89,8 @@ ssh_options=(
   -o 'ServerAliveInterval 60'
 )
 date_dir_re='[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]\.[0-2][0-9]'
+## Old adhoc-backup.conf compatilibity
+date_dir_oldformat_re='[1-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9][0-2][0-9][0-5][0-9]'
 
 cmd_usage="Usage: $0 [OPTIONS] CONFIG_FILE
 
@@ -141,9 +157,10 @@ fi
 
 ## ----------------------------------------------------------------------
 
-[[ ${#backup_targets[@]} -eq 0 ]] && pdie "No backup_targets in config file: $config_file"
+[[ ${#backup_targets[@]} -gt 0 ]] || pdie "No backup_targets in config file: $config_file"
 [[ -n $backup_directory ]] || pdie "No backup_directory in config file: $config_file"
 [[ -d $backup_directory ]] || pdie "Backup directory not found: $backup_directory"
+[[ $backup_max_age -gt 0 ]] || pdie "Backup max age must be greater than 0"
 
 ## ======================================================================
 
@@ -175,11 +192,9 @@ if [[ -d $backup_latest_link ]]; then
   backup_prev_dir="$backup_latest_link"
 else
   date_prev=$(
-    ls -F "$backup_directory/" \
-    |grep -- "^$date_dir_re/\$" \
-    |grep -v "^${date//./\\.}/\$" \
-    |sort \
-    |sed -n '$s#/$##p'
+    ls_backup_dates \
+    |tail -n 1 \
+    ;
   )
   backup_prev_dir="${date_prev:+$backup_directory/$date_prev}"
 fi
@@ -221,12 +236,8 @@ if [[ $backup_max_age -le 0 ]]; then
   exit 0
 fi
 
-ls -F "$backup_directory" \
-|grep "^$date_dir_re/\$" \
-|sed 's#/$##' \
-|sort -r \
-|grep -v "^$date$" \
-|tail -n +"$backup_max_age" \
-|while read date; do
+ls_backup_dates -r \
+|tail -n +$((backup_max_age + 1)) \
+|while read -r date; do
   run_if "$run_flag" rm -rf "$backup_directory/$date"
 done
