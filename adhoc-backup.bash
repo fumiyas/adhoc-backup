@@ -141,7 +141,7 @@ fi
 
 ## ----------------------------------------------------------------------
 
-[[ -n ${#backup_targets[@]} ]] || pdie "No backup_targets in config file: $config_file"
+[[ ${#backup_targets[@]} -eq 0 ]] && pdie "No backup_targets in config file: $config_file"
 [[ -n $backup_directory ]] || pdie "No backup_directory in config file: $config_file"
 [[ -d $backup_directory ]] || pdie "Backup directory not found: $backup_directory"
 
