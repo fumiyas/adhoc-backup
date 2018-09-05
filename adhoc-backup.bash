@@ -65,12 +65,10 @@ date=$(date "+%Y%m%d.%H")
 verbose_flag=""
 run_flag="set"
 backup_target_host=""
-backup_targets=()
 backup_excludes=()
 backup_directory=""
 backup_max_age="30"
 rsync_path="${RSYNC:-rsync}"
-rsync_options=()
 ssh_path="${SSH:-ssh}"
 ssh_id_file=""
 ssh_options=(
@@ -117,6 +115,31 @@ fi
 config_file="$1"; shift
 
 . "$config_file" || pdie "Loading config file failed: $config_file"
+
+## Old adhoc-backup.conf compatilibity
+## ----------------------------------------------------------------------
+
+if [[ -n ${backup_targets+set} ]]; then
+  if [[ "$(declare -p backup_targets)" == "declare -- "* ]]; then
+    backup_targets=($backup_targets)
+  fi
+else
+  backup_targets=()
+fi
+
+if [[ -n ${rsync_options+set} ]]; then
+  if [[ $(declare -p rsync_options) == "declare -- "* ]]; then
+    rsync_options=($rsync_options)
+  fi
+else
+  rsync_options=()
+fi
+
+if [[ -n ${rsync_command+set} ]]; then
+  rsync_path="$rsync_command"
+fi
+
+## ----------------------------------------------------------------------
 
 [[ -n ${#backup_targets[@]} ]] || pdie "No backup_targets in config file: $config_file"
 [[ -n $backup_directory ]] || pdie "No backup_directory in config file: $config_file"
