@@ -203,8 +203,11 @@ run "$rsync_path" \
   "$backup_date_dir" \
 || {
   rc="$?"
-  mv "$backup_date_dir" "$backup_date_dir.incomplete"
-  pdie "rsync command failed ($rc)"
+  ## Ignore "Partial transfer due to vanished source files" error
+  if [[ $rc -ne 24 ]]; then
+    mv "$backup_date_dir" "$backup_date_dir.incomplete"
+    pdie "rsync command failed ($rc)"
+  fi
 }
 
 run_if "$run_flag" rm -f "$backup_latest_link" \
