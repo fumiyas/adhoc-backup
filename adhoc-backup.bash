@@ -165,6 +165,8 @@ fi
 ## ======================================================================
 
 backup_date_dir="$backup_directory/$date"
+backup_data_inprogress_glob=".*.inprogress"
+backup_data_inprogress_dir="$backup_date_dir.$$.inprogress"
 backup_latest_link="$backup_directory/latest"
 
 for backup_exclude in ${backup_excludes[@]+"${backup_excludes[@]}"}; do
@@ -199,6 +201,19 @@ else
   backup_prev_dir="${date_prev:+$backup_directory/$date_prev}"
 fi
 
+## ----------------------------------------------------------------------
+
+backup_data_inprogress_fnames=$(
+  ls -d "$backup_date_dir"$backup_data_inprogress_glob 2>/dev/null || :
+)
+if [[ -n $backup_data_inprogress_fnames ]]; then
+  pdie "In-progress backup directory already exists: $backup_data_inprogress_fnames"
+fi
+
+if [[ -d $backup_date_dir ]]; then
+  mv "$backup_date_dir" "$backup_data_inprogress_dir" || exit $?
+fi
+
 ## Do backup by rsync
 ## ----------------------------------------------------------------------
 
@@ -215,15 +230,15 @@ run "$rsync_path" \
   ${backup_prev_dir:+--link-dest "$backup_prev_dir"} \
   ${rsync_options[@]+"${rsync_options[@]}"} \
   "${backup_targets[@]}" \
-  "$backup_date_dir" \
+  "$backup_data_inprogress_dir" \
 || {
   rc="$?"
   ## Ignore "Partial transfer due to vanished source files" error
   if [[ $rc -ne 24 ]]; then
-    mv "$backup_date_dir" "$backup_date_dir.incomplete"
     pdie "rsync command failed ($rc)"
   fi
 }
+mv "$backup_data_inprogress_dir" "$backup_date_dir" || exit $?
 
 run_if "$run_flag" rm -f "$backup_latest_link" \
 && run_if "$run_flag" ln -s "$date" "$backup_latest_link" \
