@@ -61,7 +61,7 @@ run_if()
 ls_backup_dates()
 {
   ls -F "$backup_directory/" \
-  |egrep "^($date_dir_re|$date_dir_oldformat_re)/\$" \
+  |grep -E "^($date_dir_re|$date_dir_oldformat_re)/\$" \
   |sed \
     -e 's#/$##' \
     -e 's/.*/& &/' \
